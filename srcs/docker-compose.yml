@@ -4,6 +4,8 @@ services:
   mariadb:
     build: requirements/mariadb/
     image: mariadb
+    ports:
+      - 3306:3306
     container_name: mariadb
     volumes:
       - db-data:/var/lib/mysql
@@ -16,8 +18,10 @@ services:
   wordpress:
     build: requirements/wordpress/
     image: wordpress
+    ports:
+      - 9000:9000
     volumes:
-      - www-data:/var/www/html/wordpress
+      - ./srcs/wordpress:/var/www/html/wordpress
     container_name: wordpress
     depends_on:
       - mariadb
@@ -32,25 +36,14 @@ services:
     image: nginx
     container_name: nginx
     volumes:
-      - www-data:/var/www/html/wordpress
+      - ./srcs/nginx:/etc/nginx/conf.d
+      - ./srcs/wordpress:/var/www/html/wordpress
     ports:
       - 443:443
     depends_on:
       - wordpress
     networks:
       - wpsite
-    restart: always
-    env_file:
-      - .env
-
-  website:
-    container_name: website
-    build: requirements/bonus/website/
-    image: website
-    networks:
-      - wpsite
-    ports:
-      - "7777:7777"
     restart: always
     env_file:
       - .env
@@ -63,10 +56,10 @@ volumes:
   db-data:
     driver_opts:
       type: none
-      device: /home/ymohamed/data/db-data
+      device: /home/suibrahi/data/db-data
       o: bind
   www-data:
     driver_opts:
       type: none
-      device: /home/ymohamed/data/www-data
+      device: /home/suibrahi/data/www-data
       o: bind
