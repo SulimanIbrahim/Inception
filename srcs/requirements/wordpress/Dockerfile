@@ -1,31 +1,25 @@
-FROM  alpine:3.18
+FROM  alpine:3.20
 
-# Update System and Install Tools
-RUN apk update
-RUN apk add openrc
+FROM alpine:3.20
 
-# Install PHP and extensions
-RUN apk --no-cache add php php-curl php-fpm php-bcmath php-gd php-soap php-zip php-curl php-mbstring \
-	php-mysqlnd php-gd php-xml php-intl php-zip php-mysqli php-pdo_mysql php-phar
+RUN apk update && apk add php php83 php83-fpm php83-mysqli php83-mbstring php83-gd php83-opcache php83-phar php83-xml mariadb-client wget tar ca-certificates && update-ca-certificates
+# FastCGI is a protocol that allows a web server (like Nginx) to communicate with applications that generate dynamic content 
+# PHP 8.3 and PHP-FPM (FastCGI Process Manager)
+# MySQL drivers for PHP (mysqli)
+# Additional PHP extensions needed for WordPress (mbstring, gd, opcache, phar, xml)
+# MariaDB client for database connection
+# wget and tar for downloading and extracting WordPress
 
-# Download WordPress and untar it
-RUN apk add --no-cache curl
-RUN curl -L -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3" https://wordpress.org/latest.tar.gz -o latest.tar.gz
-RUN tar xvf latest.tar.gz
-RUN rm latest.tar.gz
+COPY tools/wordpress.sh /wordpress.sh
 
-# Download and setup wp-cli to handle wordpress users
-RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-RUN chmod +x wp-cli.phar
-RUN mv wp-cli.phar /usr/local/bin/wp
+COPY tools/wp-cli.phar /usr/local/bin/wp
+# WP-CLI is a command-line tool specifically designed for managing WordPress installations
+# copying the WordPress Command Line Interface (WP-CLI) tool into your container.
 
-# start openrc
-RUN openrc
-RUN touch /run/openrc/softlevel
+RUN chmod +x /usr/local/bin/wp
 
-# Copy installing script and make it executable
-COPY ./tools/wordpress.sh /usr/local/bin/wordpress.sh
-RUN chmod +x /usr/local/bin/wordpress.sh
-EXPOSE 9000
+COPY conf/www.conf /etc/php83/php-fpm.d/www.conf
 
-ENTRYPOINT [ "/usr/local/bin/wordpress.sh" ]
+RUN chmod +x /wordpress.sh
+
+ENTRYPOINT [ "/wordpress.sh" ]

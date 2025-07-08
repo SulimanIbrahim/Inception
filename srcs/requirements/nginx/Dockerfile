@@ -1,5 +1,5 @@
 # Use Alpine Linux as the base image (using penultimate stable version)
-FROM alpine:3.18
+FROM alpine:3.20
 
 # Install nginx and openssl packages
 RUN apk update && \
