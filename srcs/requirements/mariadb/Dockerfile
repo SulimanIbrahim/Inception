@@ -8,7 +8,6 @@ RUN apk add mariadb mariadb-common mariadb-client openrc
 RUN openrc
 RUN touch /run/openrc/softlevel
 
- 
 # Copy installing script and make it executable
 ADD ./tools/run_mariadb.sh .
 RUN chmod +x /run_mariadb.sh

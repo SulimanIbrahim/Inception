@@ -1,5 +1,3 @@
-FROM  alpine:3.20
-
 FROM alpine:3.20
 
 RUN apk update && apk add php php83 php83-fpm php83-mysqli php83-mbstring php83-gd php83-opcache php83-phar php83-xml mariadb-client wget tar ca-certificates && update-ca-certificates

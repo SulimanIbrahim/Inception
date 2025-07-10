@@ -31,14 +31,14 @@ else
     # Copy the sample config and modify it
     cp /var/www/html/wordpress/wp-config-sample.php /var/www/html/wordpress/wp-config.php
     # Configure WordPress using wp-cli
-    # wp --allow-root core install --url="$DOMAIN_NAME" --title="$CORE_TITLE" --admin_user="$ADMIN_USER" --admin_password="$ADMIN_USER_PASS" --admin_email="$ADMIN_USER_EMAIL" --skip-email --path=/var/www/html/wordpress
+    wp --allow-root core install --url="$DOMAIN_NAME" --title="$CORE_TITLE" --admin_user="$ADMIN_USER" --admin_password="$ADMIN_USER_PASS" --admin_email="$ADMIN_USER_EMAIL" --skip-email --path=/var/www/html/wordpress
 fi
 
 # Create the administrator user in wordpress
-# wp user create "$ADMIN_USER" "$ADMIN_USER_EMAIL" --role=administrator --user_pass="$ADMIN_USER_PASS" --skip-email
+wp user create "$ADMIN_USER" "$ADMIN_USER_EMAIL" --role=administrator --user_pass="$ADMIN_USER_PASS" --skip-email
 
 # Create the normal user in wordpress
-# wp --allow-root user create "$NORMAL_USER" "$NORMAL_USER_EMAIL" --role=subscriber --user_pass="$NORMAL_USER_PASS" --path=/var/www/html/wordpress
+wp --allow-root user create "$NORMAL_USER" "$NORMAL_USER_EMAIL" --role=subscriber --user_pass="$NORMAL_USER_PASS" --path=/var/www/html/wordpress
 
 # Update PHP-FPM configuration to listen on all interfaces
 sed -i 's|listen = 127.0.0.1:9000|listen = 0.0.0.0:9000|g' /etc/php83/php-fpm.d/www.conf

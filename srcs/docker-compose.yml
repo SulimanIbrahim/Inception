@@ -1,11 +1,9 @@
-version: '3'
+version: '3.8'
 services:
 
   mariadb:
     build: requirements/mariadb/
     image: mariadb
-    ports:
-      - 3306:3306
     container_name: mariadb
     volumes:
       - mariadb:/var/lib/mysql
@@ -14,12 +12,13 @@ services:
       - Inception
     env_file:
       - .env
+    secrets:
+      - db_root_password
+      - db_password
 
   wordpress:
     build: requirements/wordpress/
     image: wordpress
-    ports:
-      - 9000:9000
     volumes:
       - "wordpress:/var/www/html/wordpress"
     container_name: wordpress
@@ -30,6 +29,9 @@ services:
     restart: always
     env_file:
       - .env
+    secrets:
+      - db_password
+      - credentials
     healthcheck:
       test: ["CMD", "php-fpm83", "-t"]
       interval: 3s
@@ -72,3 +74,11 @@ networks:
   Inception:
     name: Inception
     driver: bridge
+
+secrets:
+  db_root_password:
+    file: ../secrets/db_root_password.txt
+  db_password:
+    file: ../secrets/db_password.txt
+  credentials:
+    file: ../secrets/credentials.txt
