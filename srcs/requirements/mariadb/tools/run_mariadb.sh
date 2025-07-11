@@ -1,16 +1,39 @@
 #!/bin/sh
 
 # Read secrets if available
+# Root user password
 if [ -f "/run/secrets/db_root_password" ]; then
     ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
 else
     ROOT_PASSWORD=${MYSQL_ROOT_PASS}
 fi
 
+# Root username
+if [ -f "/run/secrets/db_root_user" ]; then
+    ROOT_USER=$(cat /run/secrets/db_root_user)
+else
+    ROOT_USER=${MYSQL_ROOT_USER}
+fi
+
+# Database password
 if [ -f "/run/secrets/db_password" ]; then
     DB_PASSWORD=$(cat /run/secrets/db_password)
 else
     DB_PASSWORD=${DATABASE_PASS}
+fi
+
+# Database username
+if [ -f "/run/secrets/db_user" ]; then
+    DB_USER=$(cat /run/secrets/db_user)
+else
+    DB_USER=${DATABASE_USER}
+fi
+
+# Database name
+if [ -f "/run/secrets/db_name" ]; then
+    DB_NAME=$(cat /run/secrets/db_name)
+else
+    DB_NAME=${DATABASE_NAME}
 fi
 
 if [ ! -f "/var/lib/mysql/ib_buffer_pool" ];
@@ -27,17 +50,17 @@ then
 
 
     # Create local user and database for wordpress
-	mysql -u ${MYSQL_ROOT_USER} -e "CREATE USER '${DATABASE_USER}'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
-	mysql -u ${MYSQL_ROOT_USER} -e "GRANT ALL PRIVILEGES ON *.* TO '${DATABASE_USER}'@'localhost' WITH GRANT OPTION;"
-	mysql -u ${MYSQL_ROOT_USER} -e "FLUSH PRIVILEGES;"
-    mysql -u ${MYSQL_ROOT_USER} -e "CREATE DATABASE ${DATABASE_NAME} DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;"
+	mysql -u $ROOT_USER -e "CREATE USER '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
+	mysql -u $ROOT_USER -e "GRANT ALL PRIVILEGES ON *.* TO '$DB_USER'@'localhost' WITH GRANT OPTION;"
+	mysql -u $ROOT_USER -e "FLUSH PRIVILEGES;"
+    mysql -u $ROOT_USER -e "CREATE DATABASE $DB_NAME DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;"
 
 	# Create new remote user and Make The user GRANT ALL PRIVILEGES on Wordpress database
-	mysql -u ${MYSQL_ROOT_USER} -e "CREATE USER '${DATABASE_USER}'@'%' IDENTIFIED BY '$DB_PASSWORD';"
-	mysql -u ${MYSQL_ROOT_USER} -e "GRANT ALL PRIVILEGES ON ${DATABASE_NAME}.* TO '${DATABASE_USER}'@'%' IDENTIFIED BY '$DB_PASSWORD';"
-	mysql -u ${MYSQL_ROOT_USER} -e "FLUSH PRIVILEGES;"
+	mysql -u $ROOT_USER -e "CREATE USER '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';"
+	mysql -u $ROOT_USER -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';"
+	mysql -u $ROOT_USER -e "FLUSH PRIVILEGES;"
 
-	mysql -u ${MYSQL_ROOT_USER} -e "ALTER USER '${MYSQL_ROOT_USER}'@'localhost' IDENTIFIED BY '$ROOT_PASSWORD';"
+	mysql -u $ROOT_USER -e "ALTER USER '$ROOT_USER'@'localhost' IDENTIFIED BY '$ROOT_PASSWORD';"
 
 fi
 
